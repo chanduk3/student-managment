@@ -1,12 +1,15 @@
-name: Deploy to Amazon Linux 2
+name: Build and Deploy
 
 on:
   push:
     branches:
-      - master
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,39 +19,41 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '7.x' # or '5.x', depending on your .NET version
+        dotnet-version: 7.0.x  # Change this to match your desired .NET version
 
     - name: Restore dependencies
       run: dotnet restore
 
-    - name: Build
+    - name: Build project
       run: dotnet build --configuration Release
 
-    - name: Publish
-      run: |
-        dotnet publish -c Release -o ${{ github.workspace }}/publish
-        ls -la ${{ github.workspace }}/publish
+    - name: Publish project
+      run: dotnet publish -c Release -o publish
 
-    - name: Show contents of publish directory
+    - name: Copy published files to Nginx directory
       run: |
-        ls -la ${{ github.workspace }}/publish
-
-    - name: List files for debugging
-      run: |
-        ls -la ${{ github.workspace }}/publish/*
-
-    - name: Deploy to Amazon Linux 2
-      uses: appleboy/ssh-action@master
-      with:
-       host: 18.119.167.40
-       username: ec2-user
-       key: ${{ secrets.SSH_PRIVATE_KEY }}
-       script: |
         sudo systemctl stop nginx
-        if [ -d "/home/runner/work/student-managment/student-managment/publish" ]; then
-            sudo cp -r /home/runner/work/student-managment/student-managment/publish/* /usr/share/nginx/html
+        if [ -d "publish" ]; then
+            sudo cp -r publish/* /usr/share/nginx/html
         else
-             echo "Error: Publish directory not found."
-             exit 1
+            echo "Error: Publish directory not found."
+            exit 1
         fi
         sudo systemctl start nginx
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH and deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: 18.119.167.40
+          username: ec2-user
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22  # Default SSH port
+          script: |
+            cd /path/to/your/app
+            git pull
+            dotnet build
+            dotnet run
