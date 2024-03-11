@@ -34,6 +34,6 @@ jobs:
         username: ec2-user
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
-          sudo systemctl stop nginx
-          sudo cp -r ./publish/* /usr/share/nginx/html
-          sudo systemctl start nginx
+           sudo systemctl stop nginx
+           sudo cp -r ${{ github.workspace }}/publish/* /usr/share/nginx/html
+           sudo systemctl start nginx
