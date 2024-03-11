@@ -45,5 +45,10 @@ jobs:
        key: ${{ secrets.SSH_PRIVATE_KEY }}
        script: |
         sudo systemctl stop nginx
-        find ${{ github.workspace }}/publish -type f -exec sudo cp {} /usr/share/nginx/html \;
+        if [ -d "/home/runner/work/student-managment/student-managment/publish" ]; then
+            sudo cp -r /home/runner/work/student-managment/student-managment/publish/* /usr/share/nginx/html
+        else
+             echo "Error: Publish directory not found."
+             exit 1
+        fi
         sudo systemctl start nginx
