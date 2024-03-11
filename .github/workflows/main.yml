@@ -29,6 +29,10 @@ jobs:
         dotnet publish -c Release -o ${{ github.workspace }}/publish
         ls -la ${{ github.workspace }}/publish
 
+    - name: Show contents of publish directory
+      run: |
+        ls -la ${{ github.workspace }}/publish
+
     - name: Deploy to Amazon Linux 2
       uses: appleboy/ssh-action@master
       with:
