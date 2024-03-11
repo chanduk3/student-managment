@@ -25,7 +25,7 @@ jobs:
       run: dotnet build --configuration Release
 
     - name: Publish
-      run: dotnet publish -c Release -o publish
+      run: dotnet publish -c Release -o ${{ github.workspace }}/publish
 
     - name: Deploy to Amazon Linux 2
       uses: appleboy/ssh-action@master
