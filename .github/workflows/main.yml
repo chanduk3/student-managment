@@ -33,6 +33,10 @@ jobs:
       run: |
         ls -la ${{ github.workspace }}/publish
 
+    - name: List files for debugging
+      run: |
+        ls -la ${{ github.workspace }}/publish/*
+
     - name: Deploy to Amazon Linux 2
       uses: appleboy/ssh-action@master
       with:
